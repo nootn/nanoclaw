@@ -35,8 +35,8 @@ RUN apt-get update && apt-get install -y \
 ENV AGENT_BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Install agent-browser, claude-code, and jules CLI globally
-RUN npm install -g agent-browser @anthropic-ai/claude-code @google/jules
+# Install agent-browser, claude-code, jules CLI, and codex CLI globally
+RUN npm install -g agent-browser @anthropic-ai/claude-code @google/jules @openai/codex
 
 # Create app directory
 WORKDIR /app
@@ -63,6 +63,9 @@ RUN printf '#!/bin/bash\nset -e\ncd /app && npx tsc --outDir /tmp/dist 2>&1 >&2\
 
 # Set ownership to node user (non-root) for writable directories
 RUN chown -R node:node /workspace
+
+# Create .codex dir so Docker can bind-mount config.toml into it
+RUN mkdir -p /home/node/.codex && chown node:node /home/node/.codex
 
 # Switch to non-root user (required for --dangerously-skip-permissions)
 USER node

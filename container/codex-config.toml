@@ -1,0 +1,38 @@
+# Codex CLI config for NanoClaw agent containers
+# Based on host ~/.codex/config.toml, with container-appropriate paths
+
+# Deployment name in Foundry / Azure OpenAI
+model = "gpt-5.3-codex-sixpivot"
+model_provider = "azure"
+
+# Optional quality/speed knob
+model_reasoning_effort = "medium"
+
+[model_providers.azure]
+# REQUIRED
+name = "Azure OpenAI"
+
+# Azure OpenAI v1 base (note /openai/v1)
+base_url = "https://andre-mm2vpjty-eastus2.cognitiveservices.azure.com/openai/v1"
+
+# Tell Codex which env var contains your key
+env_key = "AZURE_OPENAI_API_KEY_SIXPIVOT"
+
+# GPT-5/Codex uses Responses
+wire_api = "responses"
+
+# Streaming resilience (Azure sometimes drops slow streams)
+stream_idle_timeout_ms = 900000   # 15 minutes (default is 300000)
+stream_max_retries = 8            # default is 5
+request_max_retries = 6           # default is 4
+
+# Compact earlier so request bodies don't balloon
+model_auto_compact_token_limit = 60000
+
+# Reduce extra "reasoning" material that increases payload sizes
+model_reasoning_summary = "none"
+model_verbosity = "low"
+
+# Trust the container workspace
+[projects."/workspace"]
+trust_level = "trusted"

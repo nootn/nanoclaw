@@ -33,6 +33,7 @@ The Docker container image (`nanoclaw-agent:latest`) includes:
 | .NET SDK | 10.x | No auth needed |
 | `gh` (GitHub CLI) | 2.86+ | `GH_TOKEN` env var from `.env` |
 | `jules` (Google AI coding) | 0.1.42+ | Host `~/.jules/` mounted read-only |
+| `codex` (OpenAI Codex CLI) | 0.105+ | `AZURE_OPENAI_API_KEY_SIXPIVOT` env var; config from `container/codex-config.toml` |
 | `agent-browser` (Chromium) | latest | No auth needed |
 | Claude Code SDK | latest | Via `ANTHROPIC_AUTH_TOKEN` |
 
@@ -120,6 +121,19 @@ docker run --rm --entrypoint dotnet nanoclaw-agent:latest --version
 docker run --rm --entrypoint gh nanoclaw-agent:latest --version
 docker run --rm --entrypoint jules nanoclaw-agent:latest version
 ```
+
+## Re-authenticating WhatsApp
+
+If the bot stops responding and logs show repeated `405` / `Connection Failure` errors, the WhatsApp session has been invalidated and needs a fresh QR scan:
+
+```bash
+systemctl --user stop nanoclaw
+cd ~/nanoclaw && rm -rf store/auth store/auth-status.txt store/qr-data.txt && npx tsx src/whatsapp-auth.ts
+# Scan the QR code in WhatsApp → Settings → Linked Devices → Link a Device
+systemctl --user start nanoclaw
+```
+
+The `405` error means WhatsApp's server rejected the noise-protocol handshake — usually caused by the WA Web version drifting (fixed in code by using `fetchLatestBaileysVersion()`) or the session being revoked on the phone.
 
 ## Adding a New Group
 

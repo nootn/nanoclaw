@@ -169,6 +169,16 @@ function buildVolumeMounts(
     });
   }
 
+  // Mount Codex CLI config (read-only single file bind mount)
+  const codexConfigSrc = path.join(projectRoot, 'container', 'codex-config.toml');
+  if (fs.existsSync(codexConfigSrc)) {
+    mounts.push({
+      hostPath: codexConfigSrc,
+      containerPath: '/home/node/.codex/config.toml',
+      readonly: true,
+    });
+  }
+
   // Mount agent-runner source from host — recompiled on container startup.
   // Mounted from host so code changes take effect without rebuilding the image.
   const agentRunnerSrc = path.join(projectRoot, 'container', 'agent-runner', 'src');
@@ -210,6 +220,7 @@ function readSecrets(): Record<string, string> {
     'API_TIMEOUT_MS',
     'GH_TOKEN',
     'JULES_API_KEY',
+    'AZURE_OPENAI_API_KEY_SIXPIVOT',
   ]);
 }
 
