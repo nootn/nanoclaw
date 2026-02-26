@@ -56,7 +56,7 @@ log "Container runtime: $CONTAINER_RUNTIME"
 # 3. Check credentials
 CREDENTIALS="missing"
 if [ -f "$PROJECT_ROOT/.env" ]; then
-  if grep -qE "^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY)=" "$PROJECT_ROOT/.env" 2>/dev/null; then
+  if grep -qE "^(CLAUDE_CODE_OAUTH_TOKEN|ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN)=" "$PROJECT_ROOT/.env" 2>/dev/null; then
     CREDENTIALS="configured"
   fi
 fi
@@ -72,7 +72,7 @@ log "WhatsApp auth: $WHATSAPP_AUTH"
 # 5. Check registered groups (in SQLite — the JSON file gets migrated away on startup)
 REGISTERED_GROUPS=0
 if [ -f "$PROJECT_ROOT/store/messages.db" ]; then
-  REGISTERED_GROUPS=$(sqlite3 "$PROJECT_ROOT/store/messages.db" "SELECT COUNT(*) FROM registered_groups" 2>/dev/null || echo "0")
+  REGISTERED_GROUPS=$(node -e "const db=require('better-sqlite3')('$PROJECT_ROOT/store/messages.db');try{console.log(db.prepare('SELECT COUNT(*) as c FROM registered_groups').get().c)}catch{console.log(0)}" 2>/dev/null || echo "0")
 fi
 log "Registered groups: $REGISTERED_GROUPS"
 

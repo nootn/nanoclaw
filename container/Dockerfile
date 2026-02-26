@@ -1,7 +1,7 @@
 # NanoClaw Agent Container
 # Runs Claude Agent SDK in isolated Linux VM with browser automation
 
-FROM node:22-slim
+FROM node:24-slim
 
 # Install system dependencies for Chromium
 RUN apt-get update && apt-get install -y \
@@ -23,14 +23,20 @@ RUN apt-get update && apt-get install -y \
     libxshmfence1 \
     curl \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    && (curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt-get update && apt-get install -y gh) \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -fsSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 10.0 --install-dir /usr/share/dotnet \
+    && ln -s /usr/share/dotnet/dotnet /usr/local/bin/dotnet
 
 # Set Chromium path for agent-browser
 ENV AGENT_BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Install agent-browser and claude-code globally
-RUN npm install -g agent-browser @anthropic-ai/claude-code
+# Install agent-browser, claude-code, and jules CLI globally
+RUN npm install -g agent-browser @anthropic-ai/claude-code @google/jules
 
 # Create app directory
 WORKDIR /app

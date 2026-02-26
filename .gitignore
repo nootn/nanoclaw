@@ -28,5 +28,6 @@ groups/global/*
 # IDE
 .idea/
 .vscode/
+.codex/
 
 agents-sdk-docs
